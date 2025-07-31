@@ -11,6 +11,19 @@ from pathlib import Path
 load_dotenv()
 st.set_page_config(page_title="Kuziini | Generator Devize", layout="wide")
 
+# Inițializare sigură pentru session_state
+for key, default in {
+    "nume_client": "",
+    "telefon_client": "",
+    "inaltime": 0,
+    "latime": 0,
+    "adancime": 0,
+    "tip_mobilier": "",
+    "prompt": ""
+}.items():
+    if key not in st.session_state:
+        st.session_state[key] = default
+
 if Path("Kuziini_logo_negru.png").exists():
     st.image("Kuziini_logo_negru.png", width=250)
 
@@ -124,12 +137,13 @@ if select_oferta:
                     st.download_button("📊 Descarcă Excel", f, file_name=excel_file.name)
 
         if st.button("♻️ Regenerare această ofertă"):
-            st.session_state["nume_client"] = data.get("client", "")
-            st.session_state["telefon_client"] = data.get("telefon", "")
-            dim = data.get("dimensiuni", [0, 0, 0])
-            st.session_state["inaltime"] = dim[0]
-            st.session_state["latime"] = dim[1]
-            st.session_state["adancime"] = dim[2]
-            st.session_state["tip_mobilier"] = data.get("tip", "")
-            st.session_state["prompt"] = data.get("prompt", "")
+            st.session_state.update({
+                "nume_client": data.get("client", ""),
+                "telefon_client": data.get("telefon", ""),
+                "inaltime": data.get("dimensiuni", [0, 0, 0])[0],
+                "latime": data.get("dimensiuni", [0, 0, 0])[1],
+                "adancime": data.get("dimensiuni", [0, 0, 0])[2],
+                "tip_mobilier": data.get("tip", ""),
+                "prompt": data.get("prompt", "")
+            })
             st.experimental_rerun()
