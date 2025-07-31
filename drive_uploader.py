@@ -6,7 +6,7 @@ def init_drive():
     gauth.LocalWebserverAuth()
     return GoogleDrive(gauth)
 
-def upload_to_drive(drive, file_path, folder_name="Kuziini_Devize"):
-    file = drive.CreateFile({'title': file_path.split("/")[-1]})
-    file.SetContentFile(file_path)
-    file.Upload()
+def upload_to_drive(drive, filepath, folder_name):
+    f = drive.CreateFile({'title': filepath.split("/")[-1]})
+    f.SetContentFile(filepath)
+    f.Upload()

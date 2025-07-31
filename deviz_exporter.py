@@ -5,9 +5,10 @@ def export_pdf(deviz, nume_fisier):
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", size=12)
+    pdf.cell(200, 10, txt="Deviz estimativ Kuziini", ln=True, align='C')
+    pdf.ln(10)
     for item in deviz:
-        for k, v in item.items():
-            pdf.cell(200, 10, txt=f"{k}: {v}", ln=True)
+        pdf.cell(200, 10, txt=str(item), ln=True)
     pdf.output(nume_fisier + ".pdf")
 
 def export_excel(deviz, nume_fisier):
