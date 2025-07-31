@@ -20,7 +20,7 @@ def regenereaza_oferta(data):
     st.session_state["adancime"] = dim[2]
     st.session_state["tip_mobilier"] = data.get("tip", "")
     st.session_state["prompt"] = data.get("prompt", "")
-    st.experimental_rerun()
+    st.rerun()
 
 # Interfață
 if Path("Kuziini_logo_negru.png").exists():
