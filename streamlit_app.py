@@ -41,7 +41,7 @@ tip_mobilier = st.selectbox("Tip mobilier:", [
     "Corp colțar bază", "Corp colțar suspendat",
     "Dulap dressing", "Comodă", "Poliță simplă",
     "Ansamblu bucătărie", "Ansamblu dressing"
-])
+], key="tip_mobilier")
 
 prompt = st.text_area("Descriere pentru AI", key="prompt")
 foloseste_gpt = st.checkbox("Folosește GPT pentru rescriere prompt", value=True)
@@ -92,7 +92,7 @@ if st.button("Generează ofertă"):
                 upload_to_drive(drive, str(f), client_folder)
         st.success("📤 Fișierele au fost urcate în Google Drive!")
 
-# 📂 Istoric oferte cu fallback pentru chei lipsa
+# 📂 Istoric oferte generate + regenerare
 st.subheader("📂 Istoric oferte generate")
 oferta_files = sorted(output_dir.glob("OF-*.json"), reverse=True)
 oferta_options = [f.stem for f in oferta_files]
@@ -122,3 +122,14 @@ if select_oferta:
             if excel_file.exists():
                 with open(excel_file, "rb") as f:
                     st.download_button("📊 Descarcă Excel", f, file_name=excel_file.name)
+
+        if st.button("♻️ Regenerare această ofertă"):
+            st.session_state["nume_client"] = data.get("client", "")
+            st.session_state["telefon_client"] = data.get("telefon", "")
+            dim = data.get("dimensiuni", [0, 0, 0])
+            st.session_state["inaltime"] = dim[0]
+            st.session_state["latime"] = dim[1]
+            st.session_state["adancime"] = dim[2]
+            st.session_state["tip_mobilier"] = data.get("tip", "")
+            st.session_state["prompt"] = data.get("prompt", "")
+            st.experimental_rerun()
