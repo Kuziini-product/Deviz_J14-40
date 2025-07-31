@@ -1,26 +1,15 @@
-import os
-from openai import OpenAI
-from dotenv import load_dotenv
+def genereaza_deviz_AI(prompt):
+    return f"""
+- Preț unitar: 2000 RON
+- Total: 2000 RON
 
-load_dotenv()
-API_KEY = os.getenv("OPENAI_API_KEY")
+2. Fronturi Dulap Dressing
+- Material: Stejar
+- Dimensiuni: Conform designului dulapului
+- Cantitate: Conform designului dulapului
+- Preț unitar: 500 RON
+- Total: 2000 RON (presupunând 4 fronturi)
 
-if not API_KEY:
-    raise ValueError("❌ OPENAI_API_KEY nu este setată. Verifică fișierul .env sau Streamlit Secrets.")
-
-client = OpenAI(api_key=API_KEY)
-
-def genereaza_deviz_AI(prompt_user: str):
-    try:
-        response = client.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": "Ești un expert în mobilier care generează devize detaliate."},
-                {"role": "user", "content": prompt_user}
-            ],
-            temperature=0.4,
-            max_tokens=1500
-        )
-        return response.choices[0].message.content.strip()
-    except Exception as e:
-        return f"Eroare la generarea devizului: {e}"
+3. Accesorii:
+- Balamale: 8 buc x 15 RON = 120 RON
+    """

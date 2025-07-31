@@ -11,18 +11,6 @@ from pathlib import Path
 load_dotenv()
 st.set_page_config(page_title="Kuziini | Generator Devize", layout="wide")
 
-def regenereaza_oferta(data):
-    st.session_state["nume_client"] = data.get("client", "")
-    st.session_state["telefon_client"] = data.get("telefon", "")
-    dim = data.get("dimensiuni", [0, 0, 0])
-    st.session_state["inaltime"] = dim[0]
-    st.session_state["latime"] = dim[1]
-    st.session_state["adancime"] = dim[2]
-    st.session_state["tip_mobilier"] = data.get("tip", "")
-    st.session_state["prompt"] = data.get("prompt", "")
-    st.rerun()
-
-# Interfață
 if Path("Kuziini_logo_negru.png").exists():
     st.image("Kuziini_logo_negru.png", width=250)
 
@@ -36,26 +24,27 @@ st.markdown(f"📊 Devize generate: **{nr_oferte}**")
 
 col1, col2 = st.columns(2)
 with col1:
-    nume_client = st.text_input("Nume client", key="nume_client")
+    nume_client = st.text_input("Nume client", value=st.session_state.get("nume_client", ""), key="nume_client")
 with col2:
-    telefon_client = st.text_input("Telefon client", key="telefon_client")
+    telefon_client = st.text_input("Telefon client", value=st.session_state.get("telefon_client", ""), key="telefon_client")
 
 col1, col2, col3 = st.columns(3)
 with col1:
-    inaltime = st.number_input("Înălțime", min_value=0, key="inaltime")
+    inaltime = st.number_input("Înălțime", min_value=0, value=st.session_state.get("inaltime", 0), key="inaltime")
 with col2:
-    latime = st.number_input("Lățime", min_value=0, key="latime")
+    latime = st.number_input("Lățime", min_value=0, value=st.session_state.get("latime", 0), key="latime")
 with col3:
-    adancime = st.number_input("Adâncime", min_value=0, key="adancime")
+    adancime = st.number_input("Adâncime", min_value=0, value=st.session_state.get("adancime", 0), key="adancime")
 
-tip_mobilier = st.selectbox("Tip mobilier:", [
+tipuri = [
     "Corp bază bucătărie", "Corp suspendat bucătărie",
     "Corp colțar bază", "Corp colțar suspendat",
     "Dulap dressing", "Comodă", "Poliță simplă",
     "Ansamblu bucătărie", "Ansamblu dressing"
-], key="tip_mobilier")
+]
+tip_mobilier = st.selectbox("Tip mobilier:", tipuri, index=tipuri.index(st.session_state.get("tip_mobilier", tipuri[0])))
 
-prompt = st.text_area("Descriere pentru AI", key="prompt")
+prompt = st.text_area("Descriere pentru AI", value=st.session_state.get("prompt", ""), key="prompt")
 foloseste_gpt = st.checkbox("Folosește GPT pentru rescriere prompt", value=True)
 
 if st.button("Generează ofertă"):
@@ -94,17 +83,26 @@ if st.button("Generează ofertă"):
             "Cantitate": 1,
             "Pret": 1000.00
         }]
-        export_pdf(deviz, str(output_json))
-        export_excel(deviz, str(output_json))
+        export_pdf(deviz, str(output_json.with_suffix("")))
+        export_excel(deviz, str(output_json.with_suffix("")))
 
         drive = init_drive()
         client_folder = nume_client.strip().replace(" ", "_")
         for f in [output_json, output_json.with_suffix(".pdf"), output_json.with_suffix(".xlsx")]:
             if f.exists():
                 upload_to_drive(drive, str(f), client_folder)
-        st.success("📤 Fișierele au fost urcate în Google Drive!")
 
-# 📂 Istoric oferte generate + regenerare
+        st.session_state.update({
+            "nume_client": nume_client,
+            "telefon_client": telefon_client,
+            "inaltime": inaltime,
+            "latime": latime,
+            "adancime": adancime,
+            "tip_mobilier": tip_mobilier,
+            "prompt": prompt
+        })
+
+# Istoric oferte
 st.subheader("📂 Istoric oferte generate")
 oferta_files = sorted(output_dir.glob("OF-*.json"), reverse=True)
 oferta_options = [f.stem for f in oferta_files]
@@ -123,16 +121,27 @@ if select_oferta:
         st.markdown(f"- 🧱 Tip corp: **{data.get('tip', 'N/A')}**")
         st.markdown(f"- 💰 Valoare totală: **{data.get('valoare_total', 0)} lei**")
 
-        pdf_file = output_dir / f"{select_oferta}.pdf"
-        excel_file = output_dir / f"{select_oferta}.xlsx"
         col1, col2 = st.columns(2)
         with col1:
+            pdf_file = output_dir / f"{select_oferta}.pdf"
             if pdf_file.exists():
                 with open(pdf_file, "rb") as f:
                     st.download_button("📄 Descarcă PDF", f, file_name=pdf_file.name)
         with col2:
+            excel_file = output_dir / f"{select_oferta}.xlsx"
             if excel_file.exists():
                 with open(excel_file, "rb") as f:
                     st.download_button("📊 Descarcă Excel", f, file_name=excel_file.name)
 
-        st.button("♻️ Regenerare această ofertă", on_click=regenereaza_oferta, args=(data,))
+        if st.button("🔁 Regenerare această ofertă"):
+            dims = data.get("dimensiuni", [0, 0, 0])
+            st.session_state.update({
+                "nume_client": data.get("client", ""),
+                "telefon_client": data.get("telefon", ""),
+                "inaltime": dims[0],
+                "latime": dims[1],
+                "adancime": dims[2],
+                "tip_mobilier": data.get("tip", ""),
+                "prompt": data.get("prompt", "")
+            })
+            st.experimental_rerun()
