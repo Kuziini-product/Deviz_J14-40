@@ -93,8 +93,8 @@ if st.button("Generează ofertă"):
         export_pdf(lista_materiale, str(output_dir / cod))
         export_excel(lista_materiale, str(output_dir / cod))
 
-        drive = init_drive()
+        service = init_drive()
         for f in [f"{cod}.json", f"{cod}.pdf", f"{cod}.xlsx"]:
-            upload_to_drive(drive, str(output_dir / f), nume_client)
+            upload_to_drive(service, str(output_dir / f), nume_client)
 
         st.success("📤 Fișierele au fost urcate în Google Drive!")
