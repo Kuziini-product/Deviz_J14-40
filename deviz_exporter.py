@@ -1,3 +1,4 @@
+
 from fpdf import FPDF
 import pandas as pd
 
@@ -5,10 +6,9 @@ def export_pdf(deviz, nume_fisier):
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, txt="Deviz estimativ Kuziini", ln=True, align='C')
-    pdf.ln(10)
     for item in deviz:
-        pdf.cell(200, 10, txt=str(item), ln=True)
+        row = f"{item['Produs']} | {item['Cantitate']} {item['UM']} x {item['Pret']} lei"
+        pdf.cell(200, 10, txt=row, ln=True)
     pdf.output(nume_fisier + ".pdf")
 
 def export_excel(deviz, nume_fisier):
